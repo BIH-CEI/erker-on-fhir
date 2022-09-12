@@ -1,0 +1,18 @@
+resources:
+  - Patient:
+      birthDate: $geburtsdatum
+  - Observation:
+      code:
+        coding:
+          - code: LL3324-2
+            system: http://loinc.org
+      status: preliminary
+      valueCodeableConcept:
+        coding:
+          - code: $geschlecht_geburt
+            system: http://snomed.info/sct
+
+substitutions:
+  geschlecht_geburt:
+    Männlich: 248153007
+    Weiblich: 248152002
