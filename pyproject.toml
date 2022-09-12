@@ -24,6 +24,9 @@ requires = ["hatchling"]
 [tool.hatch.build]
 packages = ["erkeronfhir"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.black]
 line-length = 100
 
