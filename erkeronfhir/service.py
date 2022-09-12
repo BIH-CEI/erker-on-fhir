@@ -1,3 +1,5 @@
+from datetime import date
+from pathlib import Path
 from typing import List
 
 import fhir.resources
@@ -6,9 +8,16 @@ from fasadeonfhir.redcap.provider import RedcapProvider
 from fasadeonfhir.service import Service
 from fhir.resources.capabilitystatement import CapabilityStatement
 
+from erkeronfhir.capability import rest_capabilities
+
 
 class ErkerService(Service):
     __app_name__ = "ERKER on FHIR"
+    __capabilities_rest__ = rest_capabilities
+    __capabilities_date__ = date.fromtimestamp(
+        Path("erkeronfhir/capability.py").stat().st_mtime
+    ).isoformat()
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -30,17 +39,21 @@ class ErkerService(Service):
             "fhirVersion": fhir.resources.__fhir_version__,
             "status": "active",
             "kind": "capability",
-            "date": "2022-08-30",
+            "date": self.__capabilities_date__.isoformat(),
             "format": ["json"],
             "rest": [
                 {
                     "mode": "server",
-                    "resource": [
-                        {"type": "Patient", "interaction": [{"code": "read"}]},
-                        {"type": "Observation", "interaction": [{"code": "read"}]},
-                    ],
                 },
             ],
         }
+
+        if self.__capabilities_rest__:
+            definition["rest"][0]["resource"] = []
+            resources = definition["rest"][0]["resource"]
+
+            for resource, capability in self.__capabilities_rest__.items():
+                interactions = [{"code": item} for item in capability]
+                resources.append({"type": resource, "interaction": interactions})
 
         return CapabilityStatement(**definition)
